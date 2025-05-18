@@ -1,12 +1,13 @@
 # Confocal Automated Tracking System
 
 ## Developed by Danish Islam and Hongruo Zhang
+### Supervised by Dr. Mei Zhen at the Zhen Lab, Lunenfeld-Tanenbaum Research Institute
 
 ## Description
 
 This program is a multithreaded application built on top of pycromanager to auto-track samples on the Nikon Ti2 Confocal Microscope. The front-end GUI allows you to view your sample and the performance of your computer vision model live, as well as the ability to stop/start tracking. It is used in conjunction with the Micro-Manager Beanshell Script for recording and saving the image data to your computer as a TIFF file (see repository I will add soon). Tracking involves velocity-control of the stage for smoother tracking with a proportional controller to minimize error between the current position and desired location from the computer vision model. Here is an overview of the program structure:
 
-![image](https://github.com/zhenlab-ltri/Ti2-Tracking-Application/assets/105610097/e5721187-327a-4bbd-8461-d7274876d09e)
+<img src="assets/multithreading_diagram.png"/>
 
 ## Setting up project
 
