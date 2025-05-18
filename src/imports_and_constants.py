@@ -35,11 +35,11 @@ from pycromanager import Core
 # ---- Set to True if attached to microscope, False for debugging ----#
 
 Microscope = False
+
+# Dynamic loading of ti2_stage_wrapper
 if Microscope:
-    # Change this to dynamic loading
-    # import my_module # Only with Microscope on
-    pyd_path = os.path.abspath(os.path.join("..", "lib", "my_module.pyd"))
-    module_name = "my_module"
+    pyd_path = os.path.abspath(os.path.join("..", "lib", "ti2_stage_wrapper.pyd"))
+    module_name = "ti2_stage_wrapper"
     sys.path.append(os.path.dirname(pyd_path))
     spec = importlib.util.spec_from_file_location(module_name, pyd_path)
     module = importlib.util.module_from_spec(spec)
