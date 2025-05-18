@@ -298,7 +298,7 @@ class TrackThread(QThread):
         None
         """
 
-        # my_module.lastResort stops the previous movement by taking the previous direction of the movement, and begins a new one
+        # ti2_stage_wrapper.startAndStopMovement stops the previous movement by taking the previous direction of the movement, and begins a new one
         MoveStage.drive_stage(x_velocity,y_velocity,self.prev_x_direction,self.prev_y_direction)
         # Update previous movement direction
         self.prev_x_direction = 1 if (x_velocity > 0) else -1

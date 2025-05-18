@@ -203,7 +203,7 @@ class MoveStage():
         """
 
         if Microscope:
-            my_module.lastResort(x_vel,y_vel,prev_x_vel,prev_y_vel) # Microscope
+            ti2_stage_wrapper.startAndStopMovement(x_vel,y_vel,prev_x_vel,prev_y_vel) # Microscope
         else:
             pass # Detached
 
@@ -222,7 +222,7 @@ class MoveStage():
         """
 
         if Microscope:
-            my_module.connectToMicroscope() # Microscope
+            ti2_stage_wrapper.connectToMicroscope() # Microscope
         else:
             pass # Detached
 
@@ -254,7 +254,7 @@ class MoveStage():
         """
 
         if Microscope:
-            my_module.runXYVectorialTransfer(x_dir, x_speed, y_dir, y_speed) # Microscope
+            ti2_stage_wrapper.runXYVectorialTransfer(x_dir, x_speed, y_dir, y_speed) # Microscope
         else:
             pass # Detached
 

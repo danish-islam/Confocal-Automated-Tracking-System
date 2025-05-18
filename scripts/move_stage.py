@@ -7,8 +7,8 @@ import os
 import importlib.util
 import time
 
-pyd_path = os.path.abspath(os.path.join("..", "lib", "my_module.pyd"))
-module_name = "my_module"
+pyd_path = os.path.abspath(os.path.join("..", "lib", "ti2_stage_wrapper.pyd"))
+module_name = "ti2_stage_wrapper"
 sys.path.append(os.path.dirname(pyd_path))
 spec = importlib.util.spec_from_file_location(module_name, pyd_path)
 module = importlib.util.module_from_spec(spec)
