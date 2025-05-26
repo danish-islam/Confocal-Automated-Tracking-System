@@ -18,8 +18,10 @@ from hardware_wrappers import LiveStreamWrapper, CoreWrapper
 # Abstraction for retrieving image
 class ImageGrabber():
 
-    @staticmethod
-    def get_image(live_stream_wrap: LiveStreamWrapper) -> np.ndarray:
+    def __init__(self, microscope_online: bool):
+        self.microscope_online = microscope_online
+
+    def get_image(self, live_stream_wrap: LiveStreamWrapper) -> np.ndarray:
         """ 
         Grabs an image from the live stream wrapper.
 
@@ -34,7 +36,7 @@ class ImageGrabber():
             Returns a 2D image.
         """
 
-        if Microscope:
+        if self.microscope_online:
             # Only runs when micromanager live stream is on
             img = live_stream_wrap.snap(False)
             tagged_image = img.get(0).legacy_to_tagged_image()

@@ -16,8 +16,10 @@ from imports_and_constants import *
 
 # Wrapper for MicroManager core
 class CoreWrapper():
-    def __init__(self):
-        if Microscope:
+    def __init__(self, microscope_online):
+        self.microscope_online = microscope_online
+
+        if self.microscope_online:
             self.core_instance = Core() # Microscope
         else:
             pass # Detached
@@ -36,7 +38,7 @@ class CoreWrapper():
             Value of the x position of the stage.
         """
 
-        if Microscope:
+        if self.microscope_online:
             return self.core_instance.get_x_position() # Microscope
         else:
             return 0 # Detached
@@ -55,7 +57,7 @@ class CoreWrapper():
             Value of the y position of the stage.
         """
 
-        if Microscope:
+        if self.microscope_online:
             return self.core_instance.get_y_position() # Microscope
         else:
             return 0 # Detached
@@ -81,15 +83,17 @@ class CoreWrapper():
         None
         """
         
-        if Microscope:
+        if self.microscope_online:
             self.core_instance.set_roi(x_start,y_start,x_size,y_size)
         else:
             pass
 
 # Wrapper for LiveStreamManager
 class LiveStreamWrapper():
-    def __init__(self):
-        if Microscope:
+    def __init__(self, microscope_online: bool):
+        self.microscope_online = microscope_online
+
+        if self.microscope_online:
             self.livestream_instance = pycromanager.Studio().get_snap_live_manager() # Microscope
         else:
             pass # Detached
@@ -108,7 +112,7 @@ class LiveStreamWrapper():
             True if live stream mode is on.
         """
         
-        if Microscope:
+        if self.microscope_online:
             return self.livestream_instance.get_is_live_mode_on() # Microscope
         else:
             return True # Detached
@@ -129,7 +133,7 @@ class LiveStreamWrapper():
             2D numpy array of captured image.
         """
 
-        if Microscope:
+        if self.microscope_online:
             return self.livestream_instance.snap(display_img_bool) # Microscope
         else:
             # return np.random.randint(0, 256, size=(2048, 2048), dtype=np.uint16) # Detached 1
@@ -151,7 +155,7 @@ class LiveStreamWrapper():
             True if live stream mode is on.
         """
 
-        if Microscope:
+        if self.microscope_online:
             return self.livestream_instance.is_live_mode_on()
         else:
             pass
@@ -171,7 +175,7 @@ class LiveStreamWrapper():
         None
         """
 
-        if Microscope:
+        if self.microscope_online:
             return self.livestream_instance.set_live_mode_on(on_or_off)
         else:
             pass
@@ -180,7 +184,8 @@ class LiveStreamWrapper():
 class MoveStage():
     
     @staticmethod
-    def drive_stage(x_vel:int, y_vel:int, prev_x_vel:int, prev_y_vel:int):
+    def drive_stage(x_vel:int, y_vel:int, prev_x_vel:int, prev_y_vel:int,
+                    microscope_online: bool):
         """ 
         Stage begins to move with a velocity based on the given x and y velocity
         vectors. Must keep track of previous x and y velocities for the API to 
@@ -202,13 +207,13 @@ class MoveStage():
         None
         """
 
-        if Microscope:
+        if microscope_online:
             ti2_stage_wrapper.startAndStopMovement(x_vel,y_vel,prev_x_vel,prev_y_vel) # Microscope
         else:
             pass # Detached
 
     @staticmethod
-    def connectToMicroscope():
+    def connectToMicroscope(microscope_online: bool):
         """ 
         Interacts with API to connect to microscope.
 
@@ -221,13 +226,14 @@ class MoveStage():
         None
         """
 
-        if Microscope:
+        if microscope_online:
             ti2_stage_wrapper.connectToMicroscope() # Microscope
         else:
             pass # Detached
 
     @staticmethod
-    def runXYVectorialTransfer(x_dir: int, x_speed: int , y_dir: int, y_speed: int):
+    def runXYVectorialTransfer(x_dir: int, x_speed: int, y_dir: int, y_speed: int,
+                               microscope_online: bool):
         """ 
         Will drive stage in a direction given a vector, only if stage starts from zero
         velocity. Advised to use drive_stage member function as it is safer to stop 
@@ -253,7 +259,7 @@ class MoveStage():
         None
         """
 
-        if Microscope:
+        if microscope_online:
             ti2_stage_wrapper.runXYVectorialTransfer(x_dir, x_speed, y_dir, y_speed) # Microscope
         else:
             pass # Detached
@@ -261,8 +267,11 @@ class MoveStage():
 # Abstraction for receiving stage coordinates
 class GetStageCoords():
 
-    @staticmethod
-    def get_x_coord(core_wrap: CoreWrapper):
+    def __init__(self, core_wrap: CoreWrapper, microscope_online: bool):
+        self.core_wrap = core_wrap
+        self.microscope_online = microscope_online
+
+    def get_x_coord(self):
         """ 
         Retrieves x position of stage from abstraction.
 
@@ -277,13 +286,12 @@ class GetStageCoords():
             Value of the x position of the stage.
         """
 
-        if Microscope:
-            return core_wrap.get_x_position() # Microscope
+        if self.microscope_online:
+            return self.core_wrap.get_x_position() # Microscope
         else:
             return 0 # Detached
 
-    @staticmethod
-    def get_y_coord(core_wrap: CoreWrapper):
+    def get_y_coord(self):
         """ 
         Retrieves y position of stage from abstraction.
 
@@ -298,16 +306,20 @@ class GetStageCoords():
             Value of the y position of the stage.
         """
 
-        if Microscope:
-            return core_wrap.get_y_position() # Microscope
+        if self.microscope_online:
+            return self.core_wrap.get_y_position() # Microscope
         else:
             return 0 # Detached
         
 # Abstraction for converting pixel coordinates to cartesian coordinates
 class PixToCartCoords():
 
-    @staticmethod
-    def pixel_to_cartesian_coords(core_wrap: CoreWrapper, head_pixel_x:int, head_pixel_y:int,image_height:int,image_width:int) -> np.ndarray:
+    def __init__(self, microscope_online: bool):
+        self.microscope_online = microscope_online
+
+    def pixel_to_cartesian_coords(self, core_wrap: CoreWrapper, 
+                                  head_pixel_x:int, head_pixel_y:int,
+                                  image_height:int,image_width:int) -> np.ndarray:
         """ 
         This function takes as input the coordinates of the tracking point within the image
         and then converts it to a cartesian coordinate of where the stage should be next.
@@ -331,7 +343,7 @@ class PixToCartCoords():
             Returns a 1x2 numpy array of the form [cartesian_x_coord, cartesian_y_coord]
         """
 
-        if Microscope:
+        if self.microscope_online:
             x_scaling_factor = 0.1 * (770 / 512)  # Microscope
             y_scaling_factor = 0.1 * (770 / 512)
 
