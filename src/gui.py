@@ -33,6 +33,8 @@ class MainWindow(QWidget):
             Takes an instance of the wrapper of the Core object in Micromanager.
         live_stream_wrap: LiveStreamWrapper
             Takes an instance of the wrapper of the LiveStream object in Micromanager.
+        microscope_online: bool
+            Boolean variable set to true if microscope is online
 
         Returns
         -------
