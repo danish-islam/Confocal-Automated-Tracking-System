@@ -201,6 +201,8 @@ class MoveStage():
             Previous X Velocity
         prev_y_vel: int
             Previous X Velocity
+        microscope_online: bool
+            Boolean variable set to true if microscope is online
 
         Returns
         -------
@@ -219,7 +221,8 @@ class MoveStage():
 
         Parameters
         ----------
-        None
+        microscope_online: bool
+            Boolean variable set to true if microscope is online
 
         Returns
         -------
@@ -253,6 +256,8 @@ class MoveStage():
         y_speed: int
             Interacts with microscope's Y speed table. Please read Nikon Ti2 SDK for further 
             details.
+        microscope_online: bool
+            Boolean variable set to true if microscope is online
 
         Returns
         -------
@@ -277,8 +282,7 @@ class GetStageCoords():
 
         Parameters
         ----------
-        core_wrap: CoreWrapper
-            Takes an instance of the wrapper of the Micromanager core.
+        None
 
         Returns
         -------
@@ -297,8 +301,7 @@ class GetStageCoords():
 
         Parameters
         ----------
-        core_wrap: CoreWrapper
-            Takes an instance of the wrapper of the Micromanager core.
+        None
 
         Returns
         -------
