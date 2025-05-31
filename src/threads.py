@@ -24,7 +24,7 @@ class ImageGrabThread(QThread):
     # Define signal to emit image data to other classes
     frame_ready = pyqtSignal(object)
 
-    def __init__(self, live_stream_wrap: LiveStreamWrapper):
+    def __init__(self, live_stream_wrap: LiveStreamWrapper, microscope_online: bool):
         """ 
         Initializes Image Grabber thread.
 
@@ -32,6 +32,8 @@ class ImageGrabThread(QThread):
         ----------
         live_stream_wrap: LiveStreamWrapper
             Takes an instance of the wrapper of the LiveStream object in Micromanager.
+        microscope_online: bool
+            Boolean variable set to true if microscope is online
 
         Returns
         -------
@@ -41,6 +43,7 @@ class ImageGrabThread(QThread):
         super().__init__()
         self.display_capture_time = False
         self.live_stream_wrap = live_stream_wrap
+        self.microscope_online = microscope_online
     
     def toggle_display_capture_time(self):
         """ 
@@ -71,9 +74,11 @@ class ImageGrabThread(QThread):
         None
         """
 
+        image_grabber = ImageGrabber(self.microscope_online) # Move out of loop for efficiency!
+
         while True:
             s = time.time()
-            frame = ImageGrabber.get_image(self.live_stream_wrap)
+            frame = image_grabber.get_image(self.live_stream_wrap)
             frame = np.flipud(frame) # NOTE: Had to invert y-axis for new camera!
             e = time.time()
             if(self.display_capture_time):
@@ -90,7 +95,7 @@ class ComputerVisionThread(QThread):
     tracking_ready = pyqtSignal(object)
     skeleton_ready = pyqtSignal(object)
 
-    def __init__(self,core_wrap: CoreWrapper):
+    def __init__(self,core_wrap: CoreWrapper, microscope_online: bool):
         """ 
         Initializes Computer Vision thread.
 
@@ -98,6 +103,8 @@ class ComputerVisionThread(QThread):
         ----------
         core_wrap: CoreWrapper
             Takes an instance of the wrapper of the Core object in Micromanager.
+        microscope_online: bool
+            Boolean variable set to true if microscope is online
 
         Returns
         -------
@@ -108,6 +115,7 @@ class ComputerVisionThread(QThread):
         self.inverse = False
         self.track_right = True
         self.core_wrap = core_wrap
+        self.microscope_online = microscope_online
 
     def toggle_inverse(self):
         """ 
@@ -177,6 +185,8 @@ class ComputerVisionThread(QThread):
         None
         """
 
+        coordinate_converter = PixToCartCoords(self.microscope_online)
+
         while True:
             try:
                 # Perform segmentation here
@@ -193,7 +203,7 @@ class ComputerVisionThread(QThread):
                     # Calculate the coordinate to recentre on and emit it
                     head_coordinates = ImageSegmentation.find_center(segmented)
 
-                    cart_coords = PixToCartCoords.pixel_to_cartesian_coords(self.core_wrap,head_coordinates[0], head_coordinates[1], 512, 512)
+                    cart_coords = coordinate_converter.pixel_to_cartesian_coords(self.core_wrap,head_coordinates[0], head_coordinates[1], 512, 512)
 
                     self.tracking_ready.emit(cart_coords)
 
@@ -222,13 +232,14 @@ class TrackThread(QThread):
     cur_coordinates_ready = pyqtSignal(object)
 
     # Constructor to connect to microscope and set default previous directions
-    def __init__(self,core_wrap):
+    def __init__(self,core_wrap, microscope_online: bool):
         """ 
         Initializes tracking thread.
 
         Parameters
         ----------
-        None
+        microscope_online: bool
+            Boolean variable set to true if microscope is online
 
         Returns
         -------
@@ -241,7 +252,9 @@ class TrackThread(QThread):
         self.is_tracking_enabled = False  # Flag to indicate whether the tracking loop is enabled
         self.prev_x_direction = 1
         self.prev_y_direction = 1
-        MoveStage.connectToMicroscope()
+        self.microscope_online = microscope_online
+        MoveStage.connectToMicroscope(self.microscope_online)
+
         # self.drive_stage(0,0)
 
     # Make destructor to stop last movement, when program is terminated
@@ -299,7 +312,9 @@ class TrackThread(QThread):
         """
 
         # ti2_stage_wrapper.startAndStopMovement stops the previous movement by taking the previous direction of the movement, and begins a new one
-        MoveStage.drive_stage(x_velocity,y_velocity,self.prev_x_direction,self.prev_y_direction)
+        MoveStage.drive_stage(x_velocity,y_velocity,
+                              self.prev_x_direction,self.prev_y_direction,
+                              self.microscope_online)
         # Update previous movement direction
         self.prev_x_direction = 1 if (x_velocity > 0) else -1
         self.prev_y_direction = 1 if (y_velocity > 0) else -1
@@ -317,9 +332,11 @@ class TrackThread(QThread):
         None
         """
 
+        get_stage_coords = GetStageCoords(self.core_wrap, self.microscope_online)
+
         while self.track_coords is not None and self.track_coords != -1:
-            x_cur_pos = GetStageCoords.get_x_coord(self.core_wrap)
-            y_cur_pos = GetStageCoords.get_y_coord(self.core_wrap)
+            x_cur_pos = get_stage_coords.get_x_coord()
+            y_cur_pos = get_stage_coords.get_y_coord()
             self.cur_coordinates_ready.emit([round(x_cur_pos, 1), round(y_cur_pos, 1)])
             if self.is_tracking_enabled:  # Check if the tracking loop is enabled
 

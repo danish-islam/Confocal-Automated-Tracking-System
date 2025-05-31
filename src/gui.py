@@ -22,7 +22,8 @@ from hardware_wrappers import *
 class MainWindow(QWidget):
 
     # This will initalize the dimensions of the GUI
-    def __init__(self, core_wrap: CoreWrapper, live_stream_wrap: LiveStreamWrapper):
+    def __init__(self, core_wrap: CoreWrapper, live_stream_wrap: LiveStreamWrapper, 
+                 microscope_online: bool):
         """ 
         Initializes the GUI.
 
@@ -32,6 +33,8 @@ class MainWindow(QWidget):
             Takes an instance of the wrapper of the Core object in Micromanager.
         live_stream_wrap: LiveStreamWrapper
             Takes an instance of the wrapper of the LiveStream object in Micromanager.
+        microscope_online: bool
+            Boolean variable set to true if microscope is online
 
         Returns
         -------
@@ -48,6 +51,7 @@ class MainWindow(QWidget):
         self.live_stream_wrap = live_stream_wrap
         self.track_right = True
         self.is_tracking_enabled = False
+        self.microscope_online = microscope_online
 
         # Labels for video feeds
         self.left_label = QLabel("Livestream from Grab Image Thread")
@@ -206,7 +210,7 @@ class MainWindow(QWidget):
             self.track_thread.is_tracking_enabled = False
         self.track_thread.drive_stage(0, 0)
 
-        if Microscope:
+        if self.microscope_online:
             self.live_stream_wrap.set_live_mode_on(False)
             self.core_wrap.set_roi(0, 0, 2048, 2048)
             self.live_stream_wrap.set_live_mode_on(True)
@@ -226,11 +230,11 @@ class MainWindow(QWidget):
         None
         """
 
-        MoveStage.connectToMicroscope()
-        MoveStage.runXYVectorialTransfer(1, 0, 1, 0)
-        MoveStage.runXYVectorialTransfer(-1, 0, 1, 0)
-        MoveStage.runXYVectorialTransfer(1, 0, -1, 0)
-        MoveStage.runXYVectorialTransfer(-1, 0, -1, 0)
+        MoveStage.connectToMicroscope(self.microscope_online)
+        MoveStage.runXYVectorialTransfer(1, 0, 1, 0, self.microscope_online)
+        MoveStage.runXYVectorialTransfer(-1, 0, 1, 0, self.microscope_online)
+        MoveStage.runXYVectorialTransfer(1, 0, -1, 0, self.microscope_online)
+        MoveStage.runXYVectorialTransfer(-1, 0, -1, 0, self.microscope_online)
         print("Failsafe: Stopped the stage in all directions!")
 
     @pyqtSlot(object)

@@ -34,10 +34,10 @@ from pycromanager import Core
 
 # ---- Set to True if attached to microscope, False for debugging ----#
 
-Microscope = False
+microscope_online = False
 
 # Dynamic loading of ti2_stage_wrapper
-if Microscope:
+if microscope_online:
     pyd_path = os.path.abspath(os.path.join("..", "lib", "ti2_stage_wrapper.pyd"))
     module_name = "ti2_stage_wrapper"
     sys.path.append(os.path.dirname(pyd_path))
