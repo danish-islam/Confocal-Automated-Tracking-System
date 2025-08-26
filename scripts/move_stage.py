@@ -1,6 +1,8 @@
 """
 This test file is written to test if stage movement
 from the SDK is working properly.
+
+Confirmed successful operation on August 26th, 2025 by Danish.
 """
 import sys
 import os

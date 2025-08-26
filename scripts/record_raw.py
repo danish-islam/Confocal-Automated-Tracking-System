@@ -1,7 +1,7 @@
 """
 This is the confocal Record and Compress program!
 
-Next step: Now insert image info in text file
+Confirmed successful operation on August 26th, 2025 by Danish.
 """
 
 from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QVBoxLayout, QWidget, QMessageBox, QSizePolicy, QSlider, QLabel, QFileDialog

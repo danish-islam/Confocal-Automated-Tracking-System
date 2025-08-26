@@ -1,3 +1,10 @@
+"""
+Can test capture of a single image from pycromanager to confirm correct camera function.
+Could als0 experiment with static image and time taken.
+
+Confirmed successful operation on August 26th, 2025 by Danish.
+"""
+
 from pycromanager import Core
 import numpy as np
 import pycromanager
