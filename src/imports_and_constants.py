@@ -34,14 +34,19 @@ from pycromanager import Core
 
 # ---- Set to True if attached to microscope, False for debugging ----#
 
-microscope_online = False
+microscope_online = True
 
-# Dynamic loading of ti2_stage_wrapper
+# Dynamic loading of ti2_stage_wrapper (expects Ti2_Mic_Driver.dll and ti2_stage_wrapper.pyd in lib folder)
 if microscope_online:
-    pyd_path = os.path.abspath(os.path.join("..", "lib", "ti2_stage_wrapper.pyd"))
+    parent_dir = os.getcwd()
+    os.chdir(parent_dir + "/lib")
+
+    pyd_path = os.path.abspath(os.path.join("ti2_stage_wrapper.pyd"))
     module_name = "ti2_stage_wrapper"
     sys.path.append(os.path.dirname(pyd_path))
     spec = importlib.util.spec_from_file_location(module_name, pyd_path)
-    module = importlib.util.module_from_spec(spec)
-    sys.modules[module_name] = module
-    spec.loader.exec_module(module)
+    ti2_stage_wrapper = importlib.util.module_from_spec(spec)
+    sys.modules[module_name] = ti2_stage_wrapper
+    spec.loader.exec_module(ti2_stage_wrapper)
+
+    os.chdir(parent_dir)
