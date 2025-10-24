@@ -77,7 +77,7 @@ class ImageSegmentation():
             Returns a 2D binary thresholded image.
         """
         frame = cv2.resize(sqr_crop_img,(512,512))
-        threshold = np.quantile(frame,0.9996)
+        threshold = np.quantile(frame,0.9998)#0.9996) # Note from Danish (09/17/25): This should become a parameter in the future
         frame[frame >= threshold] = 255
         frame[frame < threshold] = 0
 

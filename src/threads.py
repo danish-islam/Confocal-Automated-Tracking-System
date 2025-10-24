@@ -79,7 +79,8 @@ class ImageGrabThread(QThread):
         while True:
             s = time.time()
             frame = image_grabber.get_image(self.live_stream_wrap)
-            frame = np.flipud(frame) # NOTE: Had to invert y-axis for new camera!
+            frame = np.flipud(frame) # NOTE: Had to invert y-axis for new camera! (Look here Hongruo!!!)
+            frame = np.fliplr(frame)
             e = time.time()
             if(self.display_capture_time):
                 print("Image capture time: " + str(e-s)) # DEBUG
