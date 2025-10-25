@@ -254,6 +254,7 @@ class TrackThread(QThread):
         self.prev_x_direction = 1
         self.prev_y_direction = 1
         self.microscope_online = microscope_online
+        self.proportional_constant = 6.0  # Default proportional constant
         MoveStage.connectToMicroscope(self.microscope_online)
 
         # self.drive_stage(0,0)
@@ -343,11 +344,12 @@ class TrackThread(QThread):
 
                 # Proportional controller
                 x_diff = self.track_coords[0] - x_cur_pos
-                y_diff = self.track_coords[1] - y_cur_pos # TODO account for inversion
-                x_velocity = 6 * x_diff
-                y_velocity = 6 * y_diff
+                y_diff = self.track_coords[1] - y_cur_pos
+                x_velocity = self.proportional_constant * x_diff
+                y_velocity = self.proportional_constant * y_diff
 
                 self.drive_stage(x_velocity, y_velocity)
+                # print("DI_DBG: " + str(self.proportional_constant))
                 # print("Tracking: " + str(self.track_coords) + " Time: " + str(time.time() - ref_time))
             time.sleep(0.05)  # Temp change to increase tracking framerate
 
@@ -372,3 +374,19 @@ class TrackThread(QThread):
             print("Tracking loop paused.")
             time.sleep(0.1)  # This should give run enough time to update its last directions to prevent -4 error
             self.drive_stage(0,0) # Stop last movement if tracking loop is paused!
+
+    def set_proportional_constant(self, value: float):
+        """ 
+        Sets the proportional constant for the tracking controller.
+
+        Parameters
+        ----------
+        value: float
+            The new proportional constant value.
+
+        Returns
+        -------
+        None
+        """
+
+        self.proportional_constant = value

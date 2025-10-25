@@ -18,7 +18,7 @@ import numpy as np
 import sys
 import cv2
 import time
-from PyQt5.QtWidgets import QApplication, QLabel, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QSplashScreen, QMessageBox
+from PyQt5.QtWidgets import QApplication, QLabel, QVBoxLayout, QHBoxLayout, QWidget, QPushButton, QSplashScreen, QMessageBox, QDoubleSpinBox, QSlider
 from PyQt5.QtCore import QThread, pyqtSignal, pyqtSlot, Qt, QTimer
 from PyQt5.QtGui import QImage, QPixmap, QFont
 import matplotlib.pyplot as plt

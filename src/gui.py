@@ -83,12 +83,48 @@ class MainWindow(QWidget):
         self.display_capture_time_button.setCheckable(True)
         self.exit_button = QPushButton("Exit")
 
+        # Tracking intensity control
+        self.proportional_label = QLabel("Tracking Intensity (1-20):")
+        self.proportional_label.setFont(QFont("Arial", 10))
+        self.proportional_spinbox = QDoubleSpinBox()
+        self.proportional_spinbox.setRange(1.0, 20.0)
+        self.proportional_spinbox.setSingleStep(0.1)
+        self.proportional_spinbox.setDecimals(1)
+        self.proportional_spinbox.setValue(6.0)
+        self.proportional_spinbox.setFixedWidth(80)
+        
+        # Tracking intensity slider
+        self.proportional_slider = QSlider(Qt.Horizontal)
+        self.proportional_slider.setRange(10, 200)  # 1.0-20.0 scaled by 10
+        self.proportional_slider.setValue(60)  # 6.0 * 10
+        
+        # Reset button for tracking intensity
+        self.reset_intensity_button = QPushButton("Reset")
+        self.reset_intensity_button.setFixedSize(100, 40)
+        font = QFont("Arial", 6)
+        font.setPixelSize(8)
+        self.reset_intensity_button.setFont(font)
+
         # self.stop_stage_button.setEnabled(False) # DEBUG
 
         # Create a vertical layout for the buttons on the left side
         buttons_layout = QVBoxLayout()
         buttons_layout.addSpacing(30)
         buttons_layout.addWidget(self.track_button)
+        buttons_layout.addSpacing(5)
+        buttons_layout.addWidget(self.proportional_label)
+        
+        # Horizontal layout for spinbox and reset button
+        spinbox_reset_layout = QHBoxLayout()
+        spinbox_reset_layout.addWidget(self.proportional_spinbox)
+        spinbox_reset_layout.addWidget(self.reset_intensity_button)
+        spinbox_reset_layout.setSpacing(5)
+        buttons_layout.addLayout(spinbox_reset_layout)
+        
+        # Add slider on its own line below
+        buttons_layout.addWidget(self.proportional_slider)
+        
+        buttons_layout.addSpacing(10)
         buttons_layout.addWidget(self.stop_stage_button)
         buttons_layout.addWidget(self.inverse_seg_button)
         buttons_layout.addWidget(self.track_other_panel_button)
@@ -188,6 +224,9 @@ class MainWindow(QWidget):
         self.inverse_seg_button.clicked.connect(self.inverse_segmentation_clicked)
         self.display_capture_time_button.clicked.connect(self.display_capture_time)
         self.track_other_panel_button.clicked.connect(self.track_other_panel)
+        self.proportional_spinbox.valueChanged.connect(self.update_proportional_constant)
+        self.proportional_slider.valueChanged.connect(self.update_from_slider)
+        self.reset_intensity_button.clicked.connect(self.reset_tracking_intensity)
 
     # When closed the application it makes sure the stage movement from our custom API is stopped
     def close_application(self):
@@ -428,6 +467,77 @@ class MainWindow(QWidget):
         """
 
         self.grab_image_thread.toggle_display_capture_time()
+
+    def update_proportional_constant(self):
+        """ 
+        Updates the proportional constant in the tracking thread when the spinbox value changes.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+
+        new_value = self.proportional_spinbox.value()
+        # Update slider to match spinbox (disconnect temporarily to avoid recursion)
+        self.proportional_slider.valueChanged.disconnect()
+        self.proportional_slider.setValue(int(new_value * 10))
+        self.proportional_slider.valueChanged.connect(self.update_from_slider)
+        
+        if hasattr(self, 'track_thread') and self.track_thread is not None:
+            self.track_thread.set_proportional_constant(new_value)
+            # print(f"Proportional constant updated to: {new_value}")
+
+    def update_from_slider(self):
+        """ 
+        Updates the proportional constant when the slider value changes.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+
+        slider_value = self.proportional_slider.value()
+        new_value = slider_value / 10.0  # Convert back from scaled value
+        
+        # Update spinbox to match slider (disconnect temporarily to avoid recursion)
+        self.proportional_spinbox.valueChanged.disconnect()
+        self.proportional_spinbox.setValue(new_value)
+        self.proportional_spinbox.valueChanged.connect(self.update_proportional_constant)
+        
+        if hasattr(self, 'track_thread') and self.track_thread is not None:
+            self.track_thread.set_proportional_constant(new_value)
+            # print(f"Proportional constant updated to: {new_value}")
+
+    def reset_tracking_intensity(self):
+        """ 
+        Resets the tracking intensity to the default value of 6.0.
+
+        Parameters
+        ----------
+        None
+
+        Returns
+        -------
+        None
+        """
+
+        default_value = 6.0
+        
+        # Update both controls to default value
+        self.proportional_spinbox.setValue(default_value)
+        self.proportional_slider.setValue(int(default_value * 10))
+        
+        if hasattr(self, 'track_thread') and self.track_thread is not None:
+            self.track_thread.set_proportional_constant(default_value)
+            # print(f"Tracking intensity reset to default: {default_value}")
 
 class SplashScreen(QSplashScreen):
     def __init__(self, parent=None):
