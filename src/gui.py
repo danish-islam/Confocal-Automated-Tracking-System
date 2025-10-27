@@ -95,6 +95,38 @@ class MainWindow(QWidget):
         
         # Tracking intensity slider
         self.proportional_slider = QSlider(Qt.Horizontal)
+        style_slider =  """
+                        QSlider::groove:horizontal {
+                            border: 1px solid #999999;
+                            height: 6px;
+                            background: #dcdcdc;
+                            margin: 0px;
+                            border-radius: 3px;
+                        }
+
+                        QSlider::handle:horizontal {
+                            background: red;        /* Handle color */
+                            border: 1px solid #5c5c5c;
+                            width: 12px;
+                            margin: -4px 0;         /* Ensures handle overlaps groove */
+                            border-radius: 6px;
+                        }
+
+                        QSlider::sub-page:horizontal {
+                            background: red;        /* Filled portion color */
+                            border: 1px solid #777;
+                            height: 6px;
+                            border-radius: 3px;
+                        }
+
+                        QSlider::add-page:horizontal {
+                            background: #bfbfbf;    /* Unfilled portion color */
+                            border: 1px solid #777;
+                            height: 6px;
+                            border-radius: 3px;
+                        }
+                        """
+        self.proportional_slider.setStyleSheet(style_slider)
         self.proportional_slider.setRange(10, 200)  # 1.0-20.0 scaled by 10
         self.proportional_slider.setValue(60)  # 6.0 * 10
         
